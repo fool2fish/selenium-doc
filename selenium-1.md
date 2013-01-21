@@ -20,7 +20,7 @@ Selenium Server 能启动和杀死浏览器进程，解析并运行由测试程�
 
 以下是一个简单的架构图：
 
-！[架构图](http://seleniumhq.org/docs/_images/chapt5_img01_Architecture_Diagram_Simple.png)
+![架构图](http://seleniumhq.org/docs/_images/chapt5_img01_Architecture_Diagram_Simple.png)
 
 上图演示了客户端和服务端进行通信以传递要执行的 Selenium 命令。然后服务端使用 Selenium-Core JavaScript 命令将 Selenium 命令传递给浏览器。浏览器则使用其内置的 JavaScript 解析器来执行 Selenium 命令。这样运行 Seleniun 动作或者验证你指定的测试脚本。
 
