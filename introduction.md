@@ -50,8 +50,7 @@ Selenium 2 代表了这个项目未来的方向，也是最新被添加到 Selen
 
 正如简史中提到的，Selenium 和 WebDriver 的作者都赞同两者各具优势，而两者的合并使得这个自动化工具更加强健。
 
-Selenium 2 支持的 WebDriver 的 API 和其底层技术兼容
-此外，为了向后兼容，Selenium 2 仍然使用 Selenium 1 的 Selenium RC 接口。 
+Selenium 2.0正是于此的产品。它支持WebDriver API及其底层技术，同时也在WebDriver API底下通过Selenium 1技术为移植测试代码提供极大的灵活性。此外，为了向后兼容，Selenium 2 仍然使用 Selenium 1 的 Selenium RC 接口。 
 
 ### Selenium 1 (又叫 Selenium RC 或远程控制)
 
