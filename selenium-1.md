@@ -144,10 +144,94 @@ Selenium RC 服务端是一个简单的 jar 包 (selenium-server-standalone-<ver
 
 在接下来的章节中，我们将介绍如何通过生成的代码创建你的测试程序。
 
+## 编写你的测试代码
 
+现在我们将为每种支持的语言演示如何通过上述例子编写你自己的测试代码。我们主要需要做2件事情：
 
+- 从 Selenium-IDE 导出指定语言的脚本，有选择性的修改它。
+- 编写一个 main() 方法来执行创建的代码。
 
+你可以选择平台支持的任意测试引擎，如 Java 的 JUnit 或 TestNG。
 
+这里我们将演示指定语言的例子。每种语言的 API 都有所不同，所以我们将单独解释每一个。
+
+### Java
+
+在 Java 中，大家通常选择 JUnit 或 TestNG 作为测试引擎。一些像 Eclipse 这样的 IDE 能通过插件直接支持它们，使得事情更简单。JUnit 和 TestNG 教学不在本文档的范围内，但是你可以通过网络找到相关资料。如果你是一个 Java 程序员，你可能已经有使用这些框架的经验了。
+
+你可能希望为 “NewTest” 测试类重命名。同时，你可能也需要修改以下语句中的浏览器打开参数。
+
+    selenium = new DefaultSelenium("localhost", 4444, "*iehta", "http://www.google.com/");
+
+使用 Selenium-IDE 创建的代码看起来大致如下。为了使代码更清晰易读，我们手工加入了注释。
+
+    
+    package com.example.tests;
+    // 我们指定了这个文件的包
+    
+    import com.thoughtworks.selenium.*;
+    // 导入驱动。
+    // 你将使用它来初始化浏览器并执行一些任务。
+    
+    import java.util.regex.Pattern;
+    // 加入正则表达式模块，因为有些我们需要使用它进行校验。
+    // 如果你的代码不需要它，完全可以移除掉。 
+    
+    public class NewTest extends SeleneseTestCase {
+    // 创建 Selenium 测试用例
+    
+          public void setUp() throws Exception {
+            setUp("http://www.google.com/", "*firefox");
+                 // 初始化并启动浏览器
+          }
+    
+          public void testNew() throws Exception {
+               selenium.open("/");
+               selenium.type("q", "selenium rc");
+               selenium.click("btnG");
+               selenium.waitForPageToLoad("30000");
+               assertTrue(selenium.isTextPresent("Results * for selenium rc"));
+               // 以上为真实的测试步骤
+         }
+    }
+
+## 学习使用 API
+
+Selenium RC API 使用以下约定：假设你了解 Selenese，并且大部分接口是自解释的。在此，我们仅解释最具争议或者看起来不那么直接明了的部分。
+
+### 启动浏览器
+
+    setUp("http://www.google.com/", "*firefox");
+
+每个例子都打开了一个浏览器，并且将浏览器作为一个浏览器对象返回，赋值给一个变量。这个变量将用于调用浏览器方法。这些方法可以执行 Selenium 命令，例如打开、键入或者校验。
+
+创建浏览器对象所需要的参数如下：
+
+#### host
+
+指定服务所在的机器的 IP 地址。通常它和运行客户端的机器是同一台。所以在这个例子中我们传入 localhost。在某些客户端中，这是一个可选参数。
+
+#### port
+
+指定服务监听的客户端用于创建连接的 TCP/IP socket。这在某些客户端中也是可选的。
+
+#### browser
+
+指定你希望运行测试的浏览器。该参数必选。
+
+#### url
+
+AUT 的基准 url。在所有的客户端中必选，并且是启动浏览器代理的 AUT 通讯的必须信息。
+
+注意，有些客户端要求调用 start() 方法来启动浏览器。
+
+### 运行 命令
+
+一旦你初始化了一个浏览器并且将其赋值给一个变量（通常命名为 "Selenium"），你可以使用这个变量调用各种方法来运行 Selenese 命令。例如，调用 selenium 对象的键入方法：
+
+    selenium.type(“field-id”,”string to type”)
+
+此时浏览器将真正执行指定的操作，在这个方法调用时指定的定位符和要键入的字符串，本质上就像是一个用户在浏览器中输入了这些内容。
 
 
 
