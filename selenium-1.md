@@ -251,7 +251,26 @@ Selenium RC 没有内置的结果报告机制。而是让你根据所选语言�
 
 大多数新接触测试框架的人将会从框架内置的报告功能开始。他们会检查任何可用库，这可比你自己开发的开销要小。当你开始使用 Selenium，毫无疑问你将开始在报告处理中使用你自己的 “print 语句”。这将可能导致你在使用一个库或框架的同时，逐渐开发开发你自己的报告功能。无论如何，在最初短暂的学习曲线之后，你将自然而然的开发出最适合你的报告功能。
 
+### 测试报告范例
 
+为了进行演示，我们将直接使用 Selenium 支持的语言的特定工具。以下列出的是最常用的，而且也是最为推荐的。
+
+#### Java 中的测试报告
+
+- 如果 Selenium 测试用例是使用 JUnit 开发的，那么 JUnit 报告就能用于创建测试报告。了解更多 [JUnit 报告](http://ant.apache.org/manual/Tasks/junitreport.html) 。
+- 如果 Selenium 测试用例是使用 TestNG 开发的，那也不需要依赖外部任务来创建测试报告。TestNG 框架创建包含测试详情列表的 HTML 报告。了解更多 [TestNG 报告](http://testng.org/doc/documentation-main.html#test-results) 。
+- ReportNG 是一个用于TestNG 框架的 HTML 报告插件。它的初衷是用于取代默认的 HTML 报告。ReportNG 提供了简单、彩色的测试结果显示。了解更多 [TestNG](http://reportng.uncommons.org/)
+- 同时，TestNG-xslt 是一个很好的摘要报告工具。TestNG-xslt 报告看起来如下图：
+
+    ![TestNG-xslt](http://seleniumhq.org/docs/_images/chapt5_TestNGxsltReport.png)
+
+    了解更多 [TestNG-xslt]()
+
+##### 记录 Selenese 命令
+
+Logging Selenium 可以用于为你的测试创建一个含有所有 Selenium 命令及其运行结果（成功或失败）的报告。为了获得这项功能，使用 Logging Selenium 扩展你的 Java 客户端。了解更多 [Logging Selenium](http://loggingselenium.sourceforge.net/index.html)
+
+## 为你的测试加点料
 
 
 
