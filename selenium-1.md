@@ -560,6 +560,97 @@ Selenium 避免同源策略约束的首选方法是代理注入。在代理注�
 
 ### 高特权浏览器（Heightened Privileges Browsers）
 
+这种方法的工作流程和代理注入非常像，主要的区别是浏览器在一个叫高特权的模式下启动，这将允许网站做一些平时不被允许做的事情（例如 XSS，或者填充文件上传输入框，或者其他一些对 Selenium 非常有用的操作）。使用这种浏览器模式， Selenium Core 就可以直接打开 AUT 并且读取或操作其内容，而不需要将整个 AUT 通过 Selenium RC 服务端中转。
+
+结构图如下：
+
+![Heightened Privileges Browsers](http://seleniumhq.org/docs/_images/chapt5_img02_Architecture_Diagram_2.png)
+
+此时，将发生以下事情：
+
+1. 客户端驱动和 Selenium RC 服务端建立一个连接。
+2. Selenium RC 服务端启动一个开打指定 url 的浏览器，并且将 Selenium Core 加载到整个页面中。
+3. Selenium Core 从客户端驱动获得第一个指令（通过向 Selenium RC 服务端发起的另一个 http 请求）。
+4. Selenium Core 执行第一个指令，典型的是打开一个 AUT 页面。
+5. 浏览器收到这个请求并且向站点服务器请求页面。一旦浏览器接收到页面内容，就会渲染到相应的帧或窗口。
+
+## 处理 HTTPS 和安全警告弹出框
+
+当需要发送诸如密码或信用卡等加密信息时，我们往往会从 http 转为 https。这在今天的应用中非常常见。Selenium RC 也支持。
+
+为了确保这个 https 站点的真实性，浏览器需要一个安全整数。否则，当浏览器使用 https 访问 AUT 时，这个应用经常被认为是不受信任的。当遇到这种情况时，浏览器会显示安全警告弹出框，而 Selenium RC 无法关闭这个弹出框。
+
+当在 Selenium RC 测试中使用 https 时，你必须使用一个支持的运行模式，并且能为你处理安全证书。你可以在测试项目初始化 Selenium 时指定这个运行模式。
+
+在 Selenium RC 1.0 beta 2 和其后续版本中，可以使用 *firefox 和 *iexplore 运行模式。在更早期的版本中，包括 Selenium RC 1.0 beta 1 使用 *chrome 和 *iehta 运行模式。通过使用这些运行模式，你不需要安装任何特殊的安全证书，Selenium RC 将帮你处理它。
+
+在版本1中，推荐运行 *firefox 和 *iexplore 运行模式。然而，我们还提供 *iexploreproxy 和 *firefoxproxy 运行模式。它们只是用于提供向后兼容，除非遗留的测试项目，否则我们不应该使用它们。在你需要处理安全证书和运行多窗口时，它们的处理将存在局限性。
+
+在 Selenium RC 的早期版本中，*chrome 或 *iehta 是支持 https 和能处理安全警告弹出窗的运行模式。它们被认为是实验性的模式，虽然现在它们已经很稳定并且有大量用户。如果你在使用 Selenium 1，你不应该使用那些老的运行模式。
+
+### 关于安全证书
+
+通常来来说，安装了安全证书后，浏览器将信任你测试的应用。你可以在浏览器的选项或者 Internet 属性中检查它（如果你不知道你的 AUT 的安全证书，询问你的系统管理员）。当 Selenium 启动了浏览器，它注入代码以解析浏览器和服务器之间的通讯。这时，浏览器认为这个引用是不被信任的了，并且会弹出一个安全警告。
+
+为了绕过这个问题，Selenium RC，（又需要使用支持的运行模式）将安装它自己的证书。将临时装在你的客户机上，能被浏览器访问到的地方。这将欺骗浏览器认为它在访问一个和你的 AUT 完全不同的重难点，就能成功的组织弹出框。
+
+另一个在早期的版本中解决此问题的方法是安装一个随 Selenium 安装提供的 Cybervillians 安全证书。大部分用户不需要做这件事情，但是当你在代理注入的模式下运行 Selenium RC 时，你就需要安装它了。
+
+## 更多浏览器支持和相关配置
+
+Selenium API 支持在多个浏览器中运行，包括 ie 和 Firefox。请从 SeleniumHQ.org 查看支持的浏览器。另外，当一个浏览器不直接被支持时，启动浏览器时，你可以使用 ”*custom“ 来指定一个浏览器运行你的 Selenium 测试（例如：替换 *firefox 或 *iexplore）。这样，你可以将这个 API 调用可执行的路径传递给浏览器。这个操作也可以在服务端的交互模式下完成。
+
+    cmd=getNewBrowserSession&1=*custom c:\Program Files\Mozilla Firefox\MyBrowser.exe&2=http://www.google.com
+
+### 使用不同的浏览器配置来运行测试
+
+通常 Selenium RC 会自动配置浏览器, 但是如果你使用 “*custom” 运行模式启动浏览器，你必须强制 Selenium RC 启动浏览器，就像自动配置不存在一样。
+
+例如，你使用如下自定义配置启动 Firefox：
+
+    cmd=getNewBrowserSession&1=*custom c:\Program Files\Mozilla Firefox\firefox.exe&2=http://www.google.com
+    
+注意，当使用这种方法启动浏览器时，我们必须手工配置浏览器使用 Selenium 服务端作为代理。通常这意味这你需要打开你的浏览器选项，指定 “localhost:4444” 作为 http 代理，但是每种浏览器的设置方式可能不太一样。
+
+注意 Mozilla 浏览器的启动和停止不太一样。你需要设置 MOZ_NO_REMOTE 环境变量确保它表现如预期。Unix 用户应该避免使用 shell 脚本来启动它，直接使用一个二进制可执行文（如：firefox-bin）会更好。
+
+## 常见问题
+
+**译者注：**这部分内容不翻译了，请参考原英文文档。
+
+- Unable to Connect to Server
+- Unable to Load the Browser
+- Selenium Cannot Find the AUT
+- Firefox Refused Shutdown While Preparing a Profile
+- Versioning Problems
+- Error message: “(Unsupported major.minor version 49.0)” while starting server
+- 404 error when running the getNewBrowserSession command
+- Permission Denied Error
+- Handling Browser Popup Windows
+- On Linux, why isn’t my Firefox browser session closing?
+- Firefox *chrome doesn’t work with custom profile
+- Is it ok to load a custom pop-up as the parent page is loading (i.e., before the parent page’s javascript window.onload() function runs)?
+- Problems With Verify Commands
+- Safari and MultiWindow Mode
+- Firefox on Linux
+- IE and Style Attributes
+- Error encountered - “Cannot convert object to primitive value” with shut down of *googlechrome browser
+- Where can I Ask Questions that Aren’t Answered Here?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
