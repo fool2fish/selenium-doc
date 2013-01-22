@@ -427,19 +427,138 @@ Logging Selenium 可以用于为你的测试创建一个含有所有 Selenium �
     
 你将看到所有配置项列表，每个配置项附带间断描述。这里提供的描述并不总是足够禽畜，所以接下来我们将对一些重要的配置项进行补充描述。
 
+### 代理配置
 
+如果你的 AUAT 使用了一个需要授权的 HTTP 代理，你需要使用以下命令来配置 http.proxyHost, http.proxyPort, http.proxyUser 和 http.proxyPassword。
 
+    $ java -jar selenium-server-standalone-<version-number>.jar -Dhttp.proxyHost=proxy.com -Dhttp.proxyPort=8080 -Dhttp.proxyUser=username -Dhttp.proxyPassword=password
 
+### 多窗口模式
 
+如果你正在使用 Selenium 1，你可以跳过这部分内容，因为多窗口模式已经是默认配置。但是在更早的版本中，AUT 默认是在子帧(sub frame)中运行的。
 
+![multi-window](http://seleniumhq.org/docs/_images/chapt5_img26_single_window_mode.png)
 
+有些应用在子帧中不能正常运行，必须要加载到顶级帧中运行。多窗口模式允许 AUT 在两个独立的窗口中运行，而不是在默认的帧中运行，这样它就能在顶级帧中运行了。
 
+![multi-window2](http://seleniumhq.org/docs/_images/chapt5_img27_multi_window_mode.png)
 
+对于老版本的 Selenium 来说，你必须通过下面的配置项明确指定多窗口模式：
 
+    -multiwindow
+    
+在 Selenium 1 以及更新的版本中，如果你希望在单窗口中运行你的测试，你可以使用以下配置项：
 
+    -singlewindow
 
+### 指定 Firefox 配置
 
+Firefox 不会同时运行两个实例，除非你为每一个指定单独的配置。Selenium RC 1 及其后续版本会自动运行两个单独的配置，所以如果你正在使用 Selenium 1，你可以跳过这个章节。如果你在使用更老的版本而你有需要指定单独的配置，你需要明确的指定它。
 
+首先，穿加你一个单独的 Firefox 配置，根据以下步骤。打开 Windows 的开始菜单，选择 “run”，然后键入以下内容：
+
+    firefox.exe -profilemanager
+
+    firefox.exe -P
+
+使用对话框来创建新配置。当你运行 Selenium 服务时，你需要使用命令行选项 -firefoxProfileTemplate 告诉它使用新的 Firefox 配置，并且指定要使用的配置的路径。
+
+    -firefoxProfileTemplate "path to the profile"
+
+**警告**
+
+确保你的配置文件被存放在一个不同于默认路径的文件夹中！！！Firefox 配置管理会在你删除一个配置的时候删除该配置所在文件夹的所有内容，而不管它是不是配置文件。
+
+更多请参考 [Mozilla’s Knowledge Base](http://support.mozilla.com/zh-CN/kb/Managing+profiles)
+
+### 通过 -htmlSuite 配置项在服务端直接运行 Selenese
+
+通过将 html 文件传递给服务端的命令行，你可以直接在 Selenium 服务端运行 Selenese html 文件。例如：
+
+    java -jar selenium-server-standalone-<version-number>.jar -htmlSuite "*firefox"
+    "http://www.google.com" "c:\absolute\path\to\my\HTMLSuite.html"
+    "c:\absolute\path\to\my\results.html"
+    
+这个例子将自动加载你的 html 测试套件，运行所有的测试并生成一份 html 格式的测试报告。
+
+**注意**
+
+在使用这个配置项时，服务端将开始运行测试，并为测试结束等待指定的秒数，如果测试没有在指定时间内结束，命令行将以一个非0的退出码退出，并且没有报告文件生成。
+
+这个命令行非常长，所以键入它的时候需要非常小心。注意这要求你传入一个 html 测试套件，而非单个的测试。并且配置项和 -interactive 不兼容，你不能同时使用他们。
+
+### Selenium 服务日志
+
+#### 服务端日志
+
+当启动 Selenium 服务，可以使用 -log 配置项来将 Selenium 服务报告的有价值的 debug 信息记录到一个文本文件。
+
+    java -jar selenium-server-standalone-<version-number>.jar -log selenium.log
+
+这个日志文件相比标准的 console 日志而言要冗余的多（它包括了 debug 级别的日志信息）。它页包含了 logger name，打印日志信息的线程 id。例如：
+
+    20:44:25 DEBUG [12] org.openqa.selenium.server.SeleniumDriverResourceHandler -
+    Browser 465828/:top frame1 posted START NEW
+
+该信息格式为：
+
+    TIMESTAMP(HH:mm:ss) LEVEL [THREAD] LOGGER - MESSAGE
+
+#### 浏览器端日志
+
+在浏览器端的 javascript （Selenium Core）也将记录重要的日志信息。在很多时候，对最终用户而言，这比常规的 Selenium 服务端日志有用的多。为了访问浏览器端日志，将 -browserSideLog 参数传递给 Selenium 服务。
+
+    java -jar selenium-server-standalone-<version-number>.jar -browserSideLog
+    
+为了将所有浏览器端的日志保存到一个文件中，-browserSideLog 必须和 -log 配置项联合使用。
+
+### 指定特定浏览器路径
+
+你可以为 Selenium RC 指定一个特定浏览器的路径。如果你需要测试同一个浏览器的不同版本时，这一功能将非常有效。同时这也允许你在一个 Selenium RC 不直接支持的浏览器中运行你的测试。当指定这个运行模式，使用 *cunstom 来指定可执行的浏览器的全路径：
+
+    *custom <path to browser>
+
+## Selenium RC 架构
+
+**注意**
+
+该主题尝试解释 Selenium RC 背后的运行原理。这并不是 Selnium 用户需要了解的基础知识，但是你会发现它对于了解一些问题非常有用。
+
+为了理解 Selenium RC 服务端工作的细节，以及为什么它使用代理注入和高特权模式你必须先了解 [同源策略](http://seleniumhq.org/docs/05_selenium_rc.jsp#the-same-origin-policy)。
+
+### 同源策略
+
+Selenium 面临的主要约束即同源策略。市面上所有的浏览器都有这个安全约束，它的目的是确保一个网站的内容永远不会被另外一个站点的脚本访问到。同源策略规定浏览器加载的任何脚本仅能操作引入它的页面所在的域的内容。它也不能执行另一个网站中的方法。例如，如果浏览器在载入 www.mysite.com 时加载了一个脚本，这脚本就不能操作 www.mysite2.com 的内容，即使那是另一个你自己的网站。如果这被允许，脚本将可以操作你打开的任何网站的内容，于是当你在 tab 页中打开一个银行站点时它就能读取你的银行账号信息。。我们把这叫 XSS(Cross-site Scripting) 攻击。
+
+为了在这个约束下工作，Selenium Core（包括它的 javascript 脚本）必须和 AUT 放置在同一个域下。
+
+之前，因为 Selenium core 使用 JavaScript 实现的，所以一直被这个问题困扰。但现在，这个问题已经得到解决。它使用 Selenium 服务端作为一个代理来避免这个问题。本质上来讲，Selenium RC 告诉浏览器它是运行在服务端提供的一个“被欺骗的”站点上。
+
+**注意**
+
+你可以在维基百科上找到更多关于 [同源策略](http://en.wikipedia.org/wiki/Same_origin_policy) 和 [XSS](http://en.wikipedia.org/wiki/Cross-site_scripting) 的内容
+
+### 代理注入
+
+Selenium 避免同源策略约束的首选方法是代理注入。在代理注入模式，Seleniium 服务端扮演一个客户端配置[1] 的 HTTP 代理[2] 的角色，它位于浏览器和 AUT 之间。它为 AUT 伪装了一个虚假的 url（将Selenium Core 和测试注入到 AUT，就好像他们来自同一个域）。
+
+1. 代理扮演一个第三方角色，在双方传递内容的过程中。它好像一个 web 服务器将 AUT 传送给浏览器。作为一个代理，使得 Selenium 服务端有能力伪装 AUT 的真实 url。
+2. 浏览器加载的时候，配置文件将指定 localhost:4444 作为 http 代理，这就是为什么浏览器发起一个 http 请求将通过 Selenium 服务端并且响应页将通过它而不是来自真实的服务器。以下是结构图：
+
+![proxy](http://seleniumhq.org/docs/_images/chapt5_img02_Architecture_Diagram_1.png)
+
+当测试开始时，将发生以下事情：
+
+1. 客户端驱动将和 Selenium RC 服务端建立一个连接。
+2. Selenium RC 服务端启动一个打开指定 url 的浏览器（或复用一个已打开的），将 Selenium Core 的 JavaScript 代码注入的这个页面中。
+3. 客户端驱动向服务端传递一个 Selenese 命令。
+4. 服务端解析这个命令，然后触发 JavaScript 脚本执行浏览器中相应的命令。
+5. Selenium Core 指示浏览器在第一个指令后开始执行，典型的是打开一个 AUT 页面。
+6. 浏览器收到打开页面的请求，并且从 Selenium RC 服务端询问获取页面内容（作为浏览器的 http 代理）
+7. Selenium RC 服务端和网站服务器通讯，一旦获取到页面，它就对页面的源进行伪装然后发送到浏览器，使这个页面看起来像是和 Selenium Core 来自于同一个源（这使得我们可以绕开同源策略的限制）
+8. 浏览器接收到这个页面并且渲染到相应的帧或者窗口。
+
+### 高特权浏览器（Heightened Privileges Browsers）
 
 
 
