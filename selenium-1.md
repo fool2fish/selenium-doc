@@ -272,6 +272,168 @@ Logging Selenium 可以用于为你的测试创建一个含有所有 Selenium �
 
 ## 为你的测试加点料
 
+现在我们将获得所有使用 Selenium 的理由，它能为你的测试添加逻辑。就像任何程序一样。程序流通过条件语句和迭代控制。另外，你能使用 IO 来报告处理信息。在这一小结中，我们将演示一些可联合 Selenium 使用的编程语言构建例子，用以解决常见的测试问题。
+
+当你将页面元素是否存在的简单测试转换成涉及多个网页和数据的动态功能时，你将发现你需要编程逻辑来校验期待的结果。一般的， Selenium-IDE 不支持迭代和标准的条件语句。你可以通过将 javascript 嵌入 Selenese 参数来实现条件控制和迭代，并且大部分的条件都比真正的编程语言要简单。此外，你可能需要使用异常处理来进行错误回复。基于这些原因，我们编写了这一小结内容来演示普通编程技巧的使用，以使你在自动化测试中获得更大的校验能力。
+
+本小结例子使用 C# 和 Java 编写而成，它们非常简单，也很容易转换成其他语言。如果你有一些面向对象编程的基础知识，你将很容易掌握这个章节。
+
+### 迭代
+
+迭代是测试中最常用的功能了。例如你可能希望执行一个查询多次。或者你需要处理那些从数据库中返回的结果集以校验你的测试结果。
+
+使用同之前一样的 [Google 搜索例子](http://seleniumhq.org/docs/05_selenium_rc.jsp#google-search-example)，让我们来检查搜索结果。这个测试将使用 Selenese：
+
+<table>
+    <tbody>
+        <tr>
+            <td>open</td>
+            <td>/</td>
+            <td>&nbsp;</td>
+        </tr>
+        <tr>
+            <td>type</td>
+            <td>q</td>
+            <td>selenium rc</td>
+        </tr>
+        <tr>
+            <td>clickAndWait</td>
+            <td>btnG</td>
+            <td>&nbsp;</td>
+        </tr>
+        <tr>
+            <td>assertTextPresent</td>
+            <td>Results * for selenium rc</td>
+            <td>&nbsp;</td>
+        </tr>
+        <tr>
+            <td>type</td>
+            <td>q</td>
+            <td>selenium ide</td>
+        </tr>
+        <tr>
+            <td>clickAndWait</td>
+            <td>btnG</td>
+            <td>&nbsp;</td>
+        </tr>
+        <tr>
+            <td>assertTextPresent</td>
+            <td>Results * for selenium ide</td>
+            <td>&nbsp;</td>
+        </tr>
+        <tr>
+            <td>type</td>
+            <td>q</td>
+            <td>selenium grid</td>
+        </tr>
+        <tr>
+            <td>clickAndWait</td>
+            <td>btnG</td>
+            <td>&nbsp;</td>
+        </tr>
+        <tr>
+            <td>assertTextPresent</td>
+            <td>Results * for selenium grid</td>
+            <td>&nbsp;</td>
+        </tr>
+    </tbody>
+</table>
+
+同样的代码重复跑了3次。将同样的代码拷贝多次运行可不是一个好的编程实践，因为维护的时候成本会很高。使用编程语言，我们可以通过迭代这一更灵活更易于维护的方式来处理搜索结果。
+
+### In Csharp
+
+    // Collection of String values.
+    String[] arr = {"ide", "rc", "grid"};
+    
+    // Execute loop for each String in array 'arr'.
+    foreach (String s in arr) {
+        sel.open("/");
+        sel.type("q", "selenium " +s);
+        sel.click("btnG");
+        sel.waitForPageToLoad("30000");
+        assertTrue("Expected text: " +s+ " is missing on page."
+        , sel.isTextPresent("Results * for selenium " + s));
+    }
+
+### 条件语句
+
+我们使用一个例子来演示条件语句的使用。让运行 Selenium 测试时，如果一个原本应该存在的元素没有出现在页面上时，将会触发一个普通的错误。例如，我们运行如下 代码：
+
+    // Java
+    selenium.type("q", "selenium " +s);
+    
+如果元素“q”不在页面上将会抛出一个异常：
+
+    com.thoughtworks.selenium.SeleniumException: ERROR: Element q not found
+
+这个异常将会终止你的测试。对于某些测试来说这正是你想要的。但是更多的时候，你并不希望这样，因为还有很多后续的测试要执行。
+
+一个更好的解决办法是我们首先判定元素是否存在，然后再进行相应的处理。我们来看看 Java 的写法：
+
+    // 如果元素可用，则则行类型判定操作
+    if(selenium.isElementPresent("q")) {
+        selenium.type("q", "Selenium rc");
+    } else {
+        System.out.printf("Element: " +q+ " is not available on page.")
+    }
+
+这样做的好处是，即使页面上没有这个元素测试也能够继续执行。
+
+### 在你的测试中执行 JavaScript
+
+在一个应用程序中使用 JavaScript 是非常方便的，但是 Selenium 不直接支持它。你可以在 Selenium RC 中使用 getEval 接口的方法来执行它。
+
+考虑一个应用中的没有静态 id 的多选框。在这种情况下，你可以通过使用 Selenium RC 对 JavaScript 语句进行求值（evaluate）来找到所有的多选框并处理它们。
+
+
+    // Java
+    public static String[] getAllCheckboxIds () {
+         String script = "var inputId  = new Array();";// Create array in java script.
+                script += "var cnt = 0;"; // Counter for check box ids.
+                script += "var inputFields  = new Array();"; // Create array in java script.
+                script += "inputFields = window.document.getElementsByTagName('input');"; // Collect input elements.
+                script += "for(var i=0; i<inputFields.length; i++) {"; // Loop through the collected elements.
+                script += "if(inputFields[i].id !=null " +
+                          "&& inputFields[i].id !='undefined' " +
+                          "&& inputFields[i].getAttribute('type') == 'checkbox') {"; // If input field is of type check box and input id is not null.
+                script += "inputId[cnt]=inputFields[i].id ;" + // Save check box id to inputId array.
+                          "cnt++;" + // increment the counter.
+                          "}" + // end of if.
+                          "}"; // end of for.
+                script += "inputId.toString();" ;// Convert array in to string.
+         String[] checkboxIds = selenium.getEval(script).split(","); // Split the string.
+         return checkboxIds;
+     }
+ 
+如果要计算页面中的图片数，你可以：
+
+    // Java
+    selenium.getEval("window.document.images.length;");
+    
+记住要调用 window 对象，以防在 DOM 表达式中其默认指向 Selenium 窗口而不是测试窗口。
+
+## 服务端选项
+
+当服务启动时，可以使用命令行配置项来改变其默认行为。
+
+回想一下，我们是这样启动服务的：
+
+    $ java -jar selenium-server-standalone-<version-number>.jar
+    
+你可以使用 -h 来查看所有的配置项：
+
+    $ java -jar selenium-server-standalone-<version-number>.jar -h
+    
+你将看到所有配置项列表，每个配置项附带间断描述。这里提供的描述并不总是足够禽畜，所以接下来我们将对一些重要的配置项进行补充描述。
+
+
+
+
+
+
+
+
 
 
 
