@@ -520,6 +520,93 @@ Chrome Driver 由 Chromium 项目团队自己维护和支持。WebDriver 通过 
 
 ### WebDriver-Backed Selenium-RC
 
+Java 版本的 WebDriver 提供了一套 Selenium-RC API 的实现。这意味着你可以使用 WebDriver 技术底层的 Selenium-RC API。这从根本上提供了向后兼容。这使得那些使用了 Selenium-RC API 的测试套件可以使用 WebDriver。这缓和了到 WebDriver 的迁移成本。同时，也允许你在同一个测试中使用两者的 API。
+
+Selenium-WebDriver 的用法如下：
+
+    // 你可以使用任何 WebDriver 的实现，这里以 Firefox 的为例。
+    WebDriver driver = new FirefoxDriver();
+    
+    // 基准 url，selenium 用于解析相对路径。
+     String baseUrl = "http://www.google.com";
+    
+    // 创建一个 Selenium 实现。
+    Selenium selenium = new WebDriverBackedSelenium(driver, baseUrl);
+    
+    // 使用 selenium 进行一些操作。
+    selenium.open("http://www.google.com");
+    selenium.type("name=q", "cheese");
+    selenium.click("name=btnG");
+    
+    // Get the underlying WebDriver implementation back. This will refer to the
+    // same WebDriver instance as the "driver" variable above.
+    WebDriver driverInstance = ((WebDriverBackedSelenium) selenium).getWrappedDriver();
+    
+    // 最后，通过调用 WebDriverBackedSelenium 实例的 stop 方法关闭浏览器。
+    // 应该避免使用 quit 方法，因为这样，在浏览器关闭后 jvm 还会继续运行。
+    selenium.stop();
+
+#### 优势
+
+- 允许 WebDriver 和 Selenium API 并存。
+- 提供了简单的机制从 Selenium RC API 迁移至 WebDriver。
+- 不需要运行 Selenium RC server。
+
+#### 劣势
+
+- 没有实现所有的方法。
+- 一些高级用法可能无效（例如 Selenium Core 中的 “browserbot” 或其他内置的 js 方法）。
+- 由于底层的实现，有些方法会比较慢。
+
+### Backing WebDriver with Selenium
+
+WebDriver 支持的浏览器数量没有 Selenium RC 多，所以如果希望使用 WebDriver 时获得更多的浏览器支持，你可以使用 SeleneseCommandExecutor。
+
+通过下面的代码，WebDriver 可以支持 safari（确保禁用弹出层）：
+
+    DesiredCapabilities capabilities = new DesiredCapabilities();
+    capabilities.setBrowserName("safari");
+    CommandExecutor executor = new SeleneseCommandExecutor(new URL("http://localhost:4444/"), new URL("http://www.google.com/"), capabilities);
+    WebDriver driver = new RemoteWebDriver(executor, capabilities);
+
+这种方案有一些明显的限制，特别是 findElements 不会如预期工作。同时，我们使用了 Selenium Core 来驱动浏览器，所以你也会受到 JavaScript 的沙箱限制。
+
+## 运行 Selenium Server 以使用 RemoteDrivers¶
+
+从 [Selenium 下载页面](https://code.google.com/p/selenium/downloads/list) 下载 selenium-server-standalone-<version>.jar，你也可以选择下载 IEDriverServer。如果你需要测试 chrome，则从 [google code](http://chromedriver.googlecode.com/) 下载它。
+
+把 IEDriverServer 和 chromedriver 解压到某个路径，并确保这个路径在 $PATH / %PATH% 中，这样 Selenium Server 就可以不需要任何设置就能操作 IE 和 chrome。
+
+从命令行启动服务：
+
+    java -jar <path_to>/selenium-server-standalone-<version>.jar
+
+如果你希望使用本地事件功能，在命令行添加以下参数：
+
+    -Dwebdriver.enable.native.events=1
+    
+查看帮助：
+
+    java -jar <path_to>/selenium-server-standalone-<version>.jar -help
+
+为了运转正常，以下端口应该允许 TCP 请求链接：4444， 7054-5（或两倍于你计划并发运行的实例数量）。在 Windows 中，你可能需要 unblock 这个应用。
+
+## 更多资源
+
+你可以在 [WebDriver wiki](http://code.google.com/p/selenium/wiki/FurtherResources) 找到更多有用的资源。
+
+当然，你可以在互联网上搜索到更多 Selenium 的话题，包括 Selenium-WebDriver’s drivers。有不少博客和众多论坛的帖子谈及到 Selenium。另外，Selenium 用户群组也是很重要的资源：http://groups.google.com/group/selenium-users。
+
+## 接下来
+
+本章节简要地从较高的层面介绍了 WebDriver 和其可信功能。一旦你熟悉了 Selenium WebDriver API 你可能会想要学习如何创建一个易于维护、可扩展的测试套件，并且提高哪些特性频繁修改的 AUT 的健壮性。大多数 Selenium 专家推荐的一种方式是：使用页面对象设计模式（可能是一个页面工厂）来设计你的测试代码。 Selenium WebDriver 在 Java 和 C sharp 中通过一个 PageFactory 类提供了这项支持。它同其他高级话题一样，将在下一章节讨论。同时，对于此项技术的较高层次的描述，你可以希望查看“测试设计考虑”章节。这两个章节都描述了如何通过模块化的思想使你的测试代码更易于维护。
+
+
+
+
+
+
+
 
 
 
