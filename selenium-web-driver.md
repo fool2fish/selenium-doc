@@ -373,5 +373,169 @@ Java：
     
     (new Actions(driver)).dragAndDrop(element, target).perform();
 
+## Driver 特性和权衡
+
+## Selenium-WebDriver’s Drivers
+
+WebDriver 是编写测试时需要用到的方法的主要接口，这套接口有几套实现。包括：
+
+### HtmlUnit Driver
+
+这是目前 WebDriver 最快速最轻量的实现。顾名思义，它是基于 HtmlUnit 的。HtmlUnit 是一个由 Java 实现的没有 GUI 的浏览器。任何非 Java 的语言绑定， Selenium Server 都需要使用这个 driver。
+
+#### 使用
+
+    WebDriver driver = new HtmlUnitDriver();
+
+#### 优势
+
+- WebDriver 最快速的实现
+- 纯 Java 实现，跨平台
+- 支持 JavaScript
+
+#### 劣势
+
+- 需要模拟浏览器中 JavaScript 的行为（如下）。
+
+#### JavaScript in the HtmlUnit Driver
+
+没有任何一个主流浏览器支持 HtmlUnit 使用的 JavaScript 引擎（Rhino）。如果你使用 HtmlUnit，测试结果可能和真实在浏览器中跑的很不一样。
+
+当我们说到 “JavaScript” 时通常是指 “JavaScript 和 DOM”。虽然 DOM 由 W3C 组织定义，但是每个浏览器在 DOM 和 JavaScript 的交互的实现方面都有一些怪异和不同的地方。HtmlUnit 完全实现了 DOM 规范，并且对 JavaScript 提供了良好的支持，但它的实现和真实的浏览器都不一样：虽然它模拟了浏览器中的实现，但既不同于 W3C 指定的标准，也不同于其他主流浏览器的实现。
+
+使用 WebDriver，我们需要做出选择：如果我们启用 HtmlUnit 的 JavaScript 支持，团队可能会遇到只有在这中情况下才会遇到的问题；如果我们禁用 JavaScript，但实际上越来越多的网站都依赖于 JavaScript。我们使用了最保守的方式，默认禁用 JavaScript 支持。对于 WebDriver 和 HtmlUnit 的每个发布版本，我们都会再次评估：这个版本是否可以默认开启 JavaScript 支持。
+
+##### 启用 JavaScript
+
+启用 JavaScript 也非常简单：
+
+    HtmlUnitDriver driver = new HtmlUnitDriver(true);
+
+上述代码会使得 HtmlUnit Driver 模拟 Firefox3.6 对 JavaScript 的处理。
+
+### Firefox Driver
+
+我们通过一个 Firefox 的插件来控制 Firefox 浏览器。使用的配置文件是从默认安装的版本精简成只包含 Selenium WebDriver.xpi (插件) 的版本。我们还修改了一些默认配置（[see the source to see which ones](http://code.google.com/p/selenium/source/browse/trunk/java/client/src/org/openqa/selenium/firefox/FirefoxProfile.java#55)）,使得 Firefox Driver 可以运行和测试在 Windows、Mac、Linux 上。
+
+#### 使用
+
+    WebDriver driver = new FirefoxDriver();
+
+#### 优势
+
+- 在真实的浏览器里运行，且支持 JavaScript
+- 比 IE Driver 快
+
+#### 劣势
+
+- 比 HtmlUnit Driver 慢
+- 需要修改 Firefox 配置
+
+例如你想修改 UA，但是你得到的是一个假的包含很多扩展的配置文件。这里有两种方式可以拿到真是的配置，假定配置文件是由 Firefox 配置管理器生成的：
+
+    ProfilesIni allProfiles = new ProfilesIni();
+    FirefoxProfile profile = allProfiles.getProfile("WebDriver");
+    profile.setPreferences("foo.bar", 23);
+    WebDriver driver = new FirefoxDriver(profile);
+
+如果配置文件没有注册至 Firefox：
+
+    File profileDir = new File("path/to/top/level/of/profile");
+    FirefoxProfile profile = new FirefoxProfile(profileDir);
+    profile.addAdditionalPreferences(extraPrefs);
+    WebDriver driver = new FirefoxDriver(profile);
+
+当我们开发 Firefox Driver 的特性时，需要评估它们是否可用。例如，直到我们认为本地方法在 Linux 的 Firefox 上是稳定的了，否则我们会默认禁用它。如需开启：
+
+    FirefoxProfile profile = new FirefoxProfile();
+    profile.setEnableNativeEvents(true);
+    WebDriver driver = new FirefoxDriver(profile);
+
+#### 信息
+
+查看 [Firefox section in the wiki page](http://code.google.com/p/selenium/wiki/FirefoxDriver) 以获得更多新鲜信息。
+
+### Internet Explorer Driver
+
+这个 driver 由一个 .dll 文件控制，并且只在 windows 系统中可用。每个 Selenium 的发布版本都包含可用于测试的核心功能，兼容 XP 上的 ie6、7、8 和 Windows7 上的 ie9。
+
+#### 使用
+
+    WebDriver driver = new InternetExplorerDriver();
+
+#### 优势
+
+- 运行在真实的浏览器中，并且支持 JavaScript，包括最终用户会碰到的一些怪异的问题。
+
+#### 劣势
+
+- 显然它只在 Windows 系统上有效。
+- 相对较慢。
+- Xpath 在很多版本中都是非原生支持。Sizzle 会注入到浏览器，这使得它比其他浏览器要慢很多，也比在相同的浏览器中使用 CSS 选择器要慢。
+- IE 6、7 不支持 CSS 选择器，由 Sizzle 注入替代。
+- IE 8、9 虽然原生支持 CSS 选择器，但它们不完全支持 CSS3.
+
+#### 信息
+
+访问 [Internet Explorer section of the wiki page](http://code.google.com/p/selenium/wiki/InternetExplorerDriver) 以获得更多新鲜信息。特别注意配置部分的内容。
+
+### Chrome Driver
+
+Chrome Driver 由 Chromium 项目团队自己维护和支持。WebDriver 通过 chromedriver 二进制包（可以在 chromiun 的下载页面找到）来工作。你需要确保同时安装了某版本的 chrome 浏览器和 chromedriver。chromedriver 需要存放在某个指定的路径下使得 WebDriver 可以自动发现它。chromedriver 可以发现安装在默认路径下的 chrome 浏览器。这些都可以被环境变量覆盖。请查看 [wiki](http://code.google.com/p/selenium/wiki/ChromeDriver) 以获得更多信息。
+
+#### 使用
+
+    WebDriver driver = new ChromeDriver();
+
+#### 优势
+
+- 运行在真实的浏览器中，并且支持 JavaScript。
+- 由于 chorme 是一个 webkit 内核的浏览器，Chrome Driver 能让你的站点在 Safari 中运行。注意自从 Chrome 使用了自己的 Javascript 引擎 V8 以后（之前是 Safari 的 Nitro 引擎），Javascript 的执行可能会一点不一样。
+
+#### 劣势
+
+- 比 HtmlUnit 慢
+
+#### 信息
+
+查看 [wiki](http://code.google.com/p/selenium/wiki/ChromeDriver) 以获得更多最新信息。更多信息可以在 [下载页面](http://seleniumhq.org/download/) 找到。
+
+#### 运行 Chrome Driver
+
+下载 [Chrome Driver](http://code.google.com/p/chromium/downloads/list) 并参考 [wiki](http://code.google.com/p/selenium/wiki/ChromeDriver) 上的其他建议。
+
+### Opera Driver
+
+查看 [wiki](http://code.google.com/p/selenium/wiki/OperaDriver)
+
+### iPhone Driver
+
+查看 [wiki](http://code.google.com/p/selenium/wiki/IPhoneDriver)
+
+### Android Driver
+
+查看 [wiki](http://code.google.com/p/selenium/wiki/AndroidDriver)
+
+## 可选择的后端：混合 WebDriver 和 RC 技术
+
+### WebDriver-Backed Selenium-RC
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
