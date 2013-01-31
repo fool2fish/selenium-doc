@@ -6,6 +6,6 @@
 - [Selenium WebDriver](https://github.com/fool2fish/selenium-doc/blob/master/official-site/selenium-web-driver.md)
 - [Selenium 1 (Selenium RC)](https://github.com/fool2fish/selenium-doc/blob/master/official-site/selenium-1.md)
 
-## 项目 wiki
+## wiki
 
 - [WebDriverJS](https://github.com/fool2fish/selenium-doc/blob/master/wiki/web-driver-js.md)
