@@ -7,3 +7,5 @@
 - [Selenium 1 (Selenium RC)](https://github.com/fool2fish/selenium-doc/blob/master/official-site/selenium-1.md)
 
 ## 项目 wiki
+
+- [WebDriverJS](https://github.com/fool2fish/selenium-doc/blob/master/wiki/web-driver-js.md)
