@@ -28,8 +28,6 @@ WebDriver 的 JavaScript 绑定（WebDriverJS），可以使 JavaScript 开发�
     
 当两个目标都被编译好以后，启动服务和 Node，开始编写测试代码：
 
-**注意：** 这两种运行方式可能需要事先在浏览器中打开 http://localhost:4444/wd/hub 
-
     $ java -jar build/java/server/src/org/openqa/grid/selenium/selenium-standalone.jar &
     $ node
     
