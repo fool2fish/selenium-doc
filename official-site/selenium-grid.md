@@ -102,10 +102,6 @@ Grid 由一个中心和一到多个节点组成。两者都是通过 selenium-se
 
 你可能想知道哪个进程使用了 4444 端口，这样你就可以让中心使用这个默认端口。使用以下命令可以查看你机器上所有运行程序使用的端口：
 
-This will work even if another hub is already running on the same machine, that is, as long as they’re both not using port 4441.
-
-You may, however, want to see what process is using port 4444 so you can allow the hub to use the default. To see the ports used by all running programs on your machine use the command.
-
     netstat -a
     
 Unix/Linux, MacOs 和 Windows 均支持此命令，只是在 Windows 中 -a 参数为必须的。基本上，你需要显示进程 id 和端口。在 Unix 中，你可以通过管道 “grep” 输出那些你关心的端口相关的条目。
