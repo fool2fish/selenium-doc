@@ -52,7 +52,7 @@ Selenium 2 代表了这个项目未来的方向，也是最新被添加到 Selen
 
 Selenium 2.0正是于此的产品。它支持WebDriver API及其底层技术，同时也在WebDriver API底下通过Selenium 1技术为移植测试代码提供极大的灵活性。此外，为了向后兼容，Selenium 2 仍然使用 Selenium 1 的 Selenium RC 接口。 
 
-### Selenium 1 (又叫 Selenium RC 或远程控制)
+### Selenium 1 (又叫 Selenium RC 或 Remote Control)
 
 正如你在简史中读到的，在很长一段时间内，Selenium RC 都是最主要的 Selenium 项目，直到 WebDriver 和 Selenium 合并而产生了最新且最强大的 Selenium 2.
 
@@ -104,7 +104,7 @@ Selenium-WebDriver 支持如下浏览器，在所有支持这些浏览器的操�
 
 这里是指老的，支持 Selenium 1 的部分。它也适用于 Selenium 2 版本中的 Selenium RC。
 
-<table>
+<table border="1">
     <tbody>
     <tr>
         <td><strong>Browser</strong></td>
