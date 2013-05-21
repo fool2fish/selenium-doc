@@ -18,6 +18,7 @@
 ### wiki
 
 - [WebDriverJS](https://github.com/fool2fish/selenium-doc/blob/master/wiki/web-driver-js.md)
+- [高级用户交互](https://github.com/fool2fish/selenium-doc/blob/master/wiki/advanced-user-interactions.md)
 
 ## 如何参与
 
