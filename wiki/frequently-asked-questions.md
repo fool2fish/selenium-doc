@@ -1,8 +1,8 @@
 ###selenium常见问题
 ---
-原文：<https://code.google.com/p/selenium/wiki/FrequentlyAskedQuestions>
+原文：<https://code.google.com/p/selenium/wiki/FrequentlyAskedQuestions>     
 ####Q:什么是WebDriver?
->A:WebDriver是一个用来写网页自动化测试的工具。它致力于模拟真实用户的行为并尽可能的实现HTML上的交互。
+>A:WebDriver是一个用来写网页自动化测试的工具。它致力于模拟真实用户的行为并尽可能的实现HTML上的交互。  
 ####Q:Selenium与[Sahi](http://sahi.co.in/)有什么异同？
 >A:它们的目标是一样的，都是为了测试webapp。但是，它们的实现是不一样的。WebDriver是直接控制浏览器的，而不是在浏览器内运行了一个Javascript应用（这牵涉到同源策略问题）。这也意味着WebDriver可以充分利用原生平台提供的任何工具。
 ####Q：什么是Selenium 2.0?
@@ -23,7 +23,7 @@
 至于其他语言，都是很相似的方法。可以看一下UsingJavaScript章节。
 ####Q：为什么我执行Javascript,总是返回NULL？
 >A:你需要让你的JS脚本有返回值。所以`js.executeScript("document.title");`会返回null;而`js.executeScript("return document.title");`则会返回页面的title。
-####Q：使用XPATH定位元素，在有的浏览器可以，有的缺不行，为什么？
+####Q：使用XPATH定位元素，在有的浏览器可以，有的却不行，为什么？
 >A:简单来说，不同的浏览器对XPATH的处理略有不同。而你整好碰上了。具体参见[XpathInWebDriver](https://code.google.com/p/selenium/wiki/XpathInWebDriver)章节。
 ####Q：InternetExplorerDriver不能在Vista上很好的工作。我应该怎么做？
 >A:InternetExplorerDriver需要所有的保护模式设置到相同的值（开启或关闭）。假如你不能修改这些，你也可以这样：  
