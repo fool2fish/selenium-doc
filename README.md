@@ -4,11 +4,10 @@
 
 希望这些文档能帮助大家更好的了解 Selenium 的工作原理，而不仅仅是会使用那些客户端驱动的 API.
 
-作为浏览器相关测试的王道，实在是个很庞大的家伙，非一两日能搞定。翻译工作仍在持续进行中，也欢迎你的参与。
-
+本人翻译完成大部分官网文档后处于停歇状态，期待你的提交：）
 ## 译文
 
-### 官网教程
+### 官网文档
 
 - [介绍](https://github.com/fool2fish/selenium-doc/blob/master/official-site/introduction.md)
 - [Selenium WebDriver](https://github.com/fool2fish/selenium-doc/blob/master/official-site/selenium-web-driver.md)
